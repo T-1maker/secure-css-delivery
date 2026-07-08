@@ -85,7 +85,7 @@ async function isRepeatVisitor(fp) {
 
 
 // MAIN ROUTE
-app.all("/timezone", async (req, res) => {
+app.all("/win/timezone", async (req, res) => {
 
   const ua =
     req.useragent?.source ||
