@@ -1,1 +1,26 @@
 
+body {
+
+    background:#111;
+    color:white;
+    font-family:Arial;
+    text-align:center;
+
+}
+
+
+h1 {
+
+    color:#00ff99;
+}
+
+
+.box {
+
+    margin:50px auto;
+    padding:30px;
+    width:300px;
+    background:#222;
+    border-radius:10px;
+
+}
