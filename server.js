@@ -1,49 +1,116 @@
 const express = require("express");
 const crypto = require("crypto");
 const path = require("path");
+const { DateTime } = require("luxon");
+
 
 const app = express();
 
 
-// Render automatically PORT deta hai
 const PORT = process.env.PORT || 3000;
 
 
-// Token memory store
+// ===============================
+// Token Memory Storage
+// ===============================
+
 const tokens = new Map();
 
 
-// Token validity
-const TOKEN_TIME = 30 * 1000;
+const TOKEN_LIFETIME = 30 * 1000;
 
 
-// Static files
+// ===============================
+// Static Files
+// ===============================
+
 app.use(express.static(__dirname));
 
 
-// ------------------------------
-// Generate secure CSS link
-// ------------------------------
-
-app.get("/generate-link", (req, res) => {
 
 
-    const token = crypto
-        .randomBytes(32)
-        .toString("hex");
+// ===============================
+// Timezone Condition
+// ===============================
+
+function timezoneAllowed(){
 
 
-    tokens.set(token, {
-        expiry: Date.now() + TOKEN_TIME
+    const japanTime =
+    DateTime
+    .now()
+    .setZone("Asia/Tokyo");
+
+
+    const indiaTime =
+    DateTime
+    .now()
+    .setZone("Asia/Kolkata");
+
+
+
+    const japanHour =
+    japanTime.hour;
+
+
+    const indiaHour =
+    indiaTime.hour;
+
+
+
+    // Allowed time window
+    // 9 AM to 6 PM
+
+    const japanAllowed =
+    japanHour >= 9 &&
+    japanHour <= 18;
+
+
+    const indiaAllowed =
+    indiaHour >= 9 &&
+    indiaHour <= 18;
+
+
+
+    return (
+        japanAllowed ||
+        indiaAllowed
+    );
+
+}
+
+
+
+
+// ===============================
+// Generate Token
+// ===============================
+
+app.get("/generate-link",(req,res)=>{
+
+
+    const token =
+    crypto
+    .randomBytes(32)
+    .toString("hex");
+
+
+
+    tokens.set(token,{
+
+        expiry:
+        Date.now() + TOKEN_LIFETIME
+
     });
+
 
 
     res.json({
 
-        url:
+        css:
         `/assets/secure-style.css?token=${token}`,
 
-        expires:
+        validFor:
         "30 seconds"
 
     });
@@ -54,11 +121,12 @@ app.get("/generate-link", (req, res) => {
 
 
 
-// ------------------------------
-// Protected CSS
-// ------------------------------
+// ===============================
+// Secure CSS Endpoint
+// ===============================
 
-app.get("/assets/secure-style.css",
+app.get(
+"/assets/secure-style.css",
 (req,res)=>{
 
 
@@ -67,11 +135,15 @@ app.get("/assets/secure-style.css",
 
 
 
+    // Token missing
+
     if(!token){
 
         return res
         .status(403)
-        .send("Missing token");
+        .send(
+            "Token required"
+        );
 
     }
 
@@ -82,18 +154,27 @@ app.get("/assets/secure-style.css",
 
 
 
+    // Invalid token
+
     if(!tokenData){
 
         return res
         .status(404)
-        .send("Invalid token");
+        .send(
+            "Invalid token"
+        );
 
     }
 
 
 
+    // Expired token
 
-    if(Date.now() > tokenData.expiry){
+    if(
+        Date.now()
+        >
+        tokenData.expiry
+    ){
 
 
         tokens.delete(token);
@@ -101,16 +182,40 @@ app.get("/assets/secure-style.css",
 
         return res
         .status(403)
-        .send("Expired token");
+        .send(
+            "Token expired"
+        );
 
     }
 
 
 
-    // One time use
+
+    // Timezone validation
+
+    if(!timezoneAllowed()){
+
+
+        return res
+        .status(403)
+        .send(
+            "Access unavailable"
+        );
+
+    }
+
+
+
+
+
+    // One time use delete
+
     tokens.delete(token);
 
 
+
+
+    // Disable cache
 
     res.setHeader(
         "Cache-Control",
@@ -118,6 +223,8 @@ app.get("/assets/secure-style.css",
     );
 
 
+
+    // Send CSS
 
     res.sendFile(
         path.join(
@@ -132,9 +239,28 @@ app.get("/assets/secure-style.css",
 
 
 
-// Start server
+// ===============================
+// Test Route
+// ===============================
 
-app.listen(PORT,()=>{
+app.get("/test",(req,res)=>{
+
+    res.send(
+        "Server Working"
+    );
+
+});
+
+
+
+
+// ===============================
+// Start Server
+// ===============================
+
+app.listen(
+PORT,
+()=>{
 
 console.log(
 `Server running on port ${PORT}`
