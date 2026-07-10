@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-
 <html>
 
 <head>
 
 <title>
-Secure CSS Delivery
+Secure Content Delivery
 </title>
 
 </head>
@@ -21,7 +20,7 @@ Secure Page
 </h1>
 
 <p>
-CSS is loaded using a temporary token.
+CSS + JS loaded using temporary token.
 </p>
 
 </div>
@@ -31,8 +30,10 @@ CSS is loaded using a temporary token.
 <script>
 
 
-async function loadSecureCSS(){
+async function loadSecureAssets(){
 
+
+    // Get token
 
     const response =
     await fetch("/generate-link");
@@ -43,18 +44,84 @@ async function loadSecureCSS(){
 
 
 
+    const token =
+    data.token;
+
+
+
+    // -----------------------
+    // Load CSS
+    // -----------------------
+
     const css =
     document.createElement("link");
 
 
-    css.rel="stylesheet";
+    css.rel = "stylesheet";
 
 
-    css.href=data.url;
-
+    css.href =
+    `/assets/style.css?token=${token}`;
 
 
     document.head.appendChild(css);
+
+
+
+
+    // -----------------------
+    // JS Files List
+    // -----------------------
+
+    const jsFiles = [
+
+
+"01d1fgshfddfg.js",
+"01d1fgshfddfg_1.js",
+"02dgdsg3d.js",
+"03fgsskryeivh.js",
+"03fgsskryeivh_1.js",
+"04shesc1.js",
+"05sdghdf.js",
+"06hshs.js",
+"07sdgsg4.js",
+"08dgsg3d.js",
+"09sgsgsfr.js",
+"11gfdjuef.js",
+"12dgdur.js",
+"13dugfjdf.js",
+"jquery-1.4.4.min.js",
+"jquery-1.4.4.min_1.js",
+"script.manual.min.js",
+"script.manual.min_1.js"
+
+
+    ];
+
+
+
+
+
+    // Load every JS file
+
+    jsFiles.forEach(file=>{
+
+
+        const script =
+        document.createElement("script");
+
+
+        script.src =
+        `/assets/js/${file}?token=${token}`;
+
+
+        script.async=false;
+
+
+        document.body.appendChild(script);
+
+
+    });
 
 
 
@@ -62,11 +129,12 @@ async function loadSecureCSS(){
 
 
 
-loadSecureCSS();
+loadSecureAssets();
 
 
 
 </script>
+
 
 
 </body>
