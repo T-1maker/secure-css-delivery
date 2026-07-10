@@ -1,19 +1,11 @@
 {
-  "name": "timezone-proxy",
+  "name": "secure-css-delivery",
   "version": "1.0.0",
-  "description": "Express proxy with Redis fingerprint protection",
-  "type": "module",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node index.js"
-  },
-  "engines": {
-    "node": ">=20"
+    "start": "node server.js"
   },
   "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^4.21.2",
-    "express-useragent": "^1.0.15",
-    "redis": "^5.8.2"
+    "express": "^5.1.0"
   }
 }
